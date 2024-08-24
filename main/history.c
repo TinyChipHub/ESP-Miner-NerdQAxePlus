@@ -141,7 +141,7 @@ static void update_avg(avg_t *avg)
     // adjust the window on the older side
     // but make sure we have at least as many saples for the full duration
     uint64_t first_timestamp = 0;
-    while (first_timestamp = history_get_timestamp_sample(avg->first_sample), (last_timestamp - first_timestamp) > avg->timespan) {
+    while (first_timestamp = history_get_timestamp_sample(avg->first_sample), (last_timestamp - first_timestamp) >= avg->timespan) {
         avg->diffsum -= (uint64_t) history_get_share_sample(avg->first_sample);
         avg->first_sample++;
     }
