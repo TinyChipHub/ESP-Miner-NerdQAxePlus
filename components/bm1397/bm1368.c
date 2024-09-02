@@ -56,11 +56,9 @@ typedef struct __attribute__((__packed__))
     uint8_t job_id;
     uint16_t version;
     uint8_t crc;
-} asic_result;
+} asic_result_t;
 
 static const char *TAG = "bm1368Module";
-
-static uint8_t asic_response_buffer[CHUNK_SIZE];
 
 static const uint8_t chip_id[6] = {0xaa, 0x55, 0x13, 0x68, 0x00, 0x00};
 
@@ -254,13 +252,14 @@ static uint8_t _send_init(uint64_t frequency, uint16_t asic_count)
 
     int chip_counter = 0;
     while (true) {
-        if (SERIAL_rx(asic_response_buffer, 11, 1000) > 0) {
-            if (!strncmp((char *) chip_id, (char *) asic_response_buffer, sizeof(chip_id))) {
+        asic_result_t asic_result;
+        if (SERIAL_rx((uint8_t*) &asic_result, sizeof(asic_result_t), 1000) > 0) {
+            if (!strncmp((char*) chip_id, (char*) &asic_result, sizeof(chip_id))) {
                 chip_counter++;
                 ESP_LOGI(TAG, "found asic #%d", chip_counter);
             } else {
                 ESP_LOGE(TAG, "unexpected response ... ignoring ...");
-                ESP_LOG_BUFFER_HEX(TAG, asic_response_buffer, 11);
+                ESP_LOG_BUFFER_HEX(TAG, (uint8_t*) &asic_result, 11);
             }
         } else {
             break;
@@ -361,11 +360,37 @@ static void _send_read_address(void)
     _send_BM1368((TYPE_CMD | GROUP_ALL | CMD_READ), read_address, 2, BM1368_SERIALTX_DEBUG);
 }
 
+void BM1368_request_chip_temp() {
+    _send_BM1368((TYPE_CMD | GROUP_ALL | CMD_READ), (uint8_t[2]){0x00, 0xB4}, 2, BM1368_SERIALTX_DEBUG);
+    _send_BM1368((TYPE_CMD | GROUP_ALL | CMD_WRITE), (uint8_t[6]){0x00, 0xB0, 0x80, 0x00, 0x00, 0x00}, 6, BM1368_SERIALTX_DEBUG);
+    _send_BM1368((TYPE_CMD | GROUP_ALL | CMD_WRITE), (uint8_t[6]){0x00, 0xB0, 0x00, 0x02, 0x00, 0x00}, 6, BM1368_SERIALTX_DEBUG);
+    _send_BM1368((TYPE_CMD | GROUP_ALL | CMD_WRITE), (uint8_t[6]){0x00, 0xB0, 0x01, 0x02, 0x00, 0x00}, 6, BM1368_SERIALTX_DEBUG);
+    _send_BM1368((TYPE_CMD | GROUP_ALL | CMD_WRITE), (uint8_t[6]){0x00, 0xB0, 0x10, 0x02, 0x00, 0x00}, 6, BM1368_SERIALTX_DEBUG);
+}
+
+bool BM1368_chip_temp_from_response(task_result *result, uint16_t *value, uint8_t *id) {
+    // response looks like this: aa55 8000080c 00 b4 0000 1a
+    // check if this is a chip temp response
+    if (result->job_id_raw != 0xb4 || result->nonce & 0x0000ff7f || result->rolled_version) {
+        return false;
+    }
+
+
+    // set zero values in case measurement is not complete yet
+    *value = 0;
+    *id = 0;
+
+    // the (big-endian-)MSB indicates temp measurement completed
+    if (result->nonce & 0x00000080) {
+        *value = (result->nonce & 0xff000000) >> 24 | (result->nonce & 0x00ff0000) >> 8;
+        *id = result->midstate_num >> 1;
+    }
+    return true;
+}
+
 uint8_t BM1368_init(uint64_t frequency, uint16_t asic_count)
 {
     ESP_LOGI(TAG, "Initializing BM1368");
-
-    memset(asic_response_buffer, 0, 1024);
 
     // enable LDOs
     gpio_pad_select_gpio(GPIO_NUM_13);
@@ -458,27 +483,26 @@ uint8_t BM1368_send_work(uint32_t job_id, bm_job *next_bm_job)
     return job.job_id;
 }
 
-asic_result *BM1368_receive_work(void)
+bool BM1368_receive_work(asic_result_t *asic_result)
 {
     // wait for a response, wait time is pretty arbitrary
-    int received = SERIAL_rx(asic_response_buffer, 11, 60000);
+    int received = SERIAL_rx((uint8_t*) asic_result, sizeof(asic_result_t), 60000);
 
     if (received < 0) {
         ESP_LOGI(TAG, "Error in serial RX");
-        return NULL;
+        return false;
     } else if (received == 0) {
         // Didn't find a solution, restart and try again
-        return NULL;
+        return false;
     }
 
-    if (received != 11 || asic_response_buffer[0] != 0xAA || asic_response_buffer[1] != 0x55) {
+    if (received != 11 || asic_result->preamble[0] != 0xAA || asic_result->preamble[1] != 0x55) {
         ESP_LOGE(TAG, "Serial RX invalid %i", received);
-        ESP_LOG_BUFFER_HEX(TAG, asic_response_buffer, received);
+        ESP_LOG_BUFFER_HEX(TAG, (uint8_t*) asic_result, received);
         SERIAL_clear_buffer();
-        return NULL;
+        return false;
     }
-
-    return (asic_result *) asic_response_buffer;
+    return true;
 }
 
 static uint16_t reverse_uint16(uint16_t num)
@@ -486,22 +510,25 @@ static uint16_t reverse_uint16(uint16_t num)
     return (num >> 8) | (num << 8);
 }
 
-void BM1368_proccess_work(task_result *result)
+bool BM1368_process_work(task_result *result)
 {
-    asic_result *asic_result = BM1368_receive_work();
-
-    if (asic_result == NULL) {
-        return;
+    asic_result_t asic_result;
+    if (!BM1368_receive_work((uint8_t*) &asic_result)) {
+        return false;
     }
 
-    uint8_t job_id = (asic_result->job_id & 0xf0) >> 1;
+    uint8_t job_id = (asic_result.job_id & 0xf0) >> 1;
 
-    uint32_t rolled_version = (reverse_uint16(asic_result->version) << 13); // shift the 16 bit value left 13
+    uint32_t rolled_version = (reverse_uint16(asic_result.version) << 13); // shift the 16 bit value left 13
 
-    int asic_nr = (asic_result->nonce & 0x0000fc00) >> 10;
+    int asic_nr = (asic_result.nonce & 0x0000fc00) >> 10;
 
     result->job_id = job_id;
     result->asic_nr = asic_nr;
-    result->nonce = asic_result->nonce;
+    result->nonce = asic_result.nonce;
     result->rolled_version = rolled_version;
+    result->job_id_raw = asic_result.job_id;
+    result->midstate_num = asic_result.midstate_num;
+
+    return true;
 }

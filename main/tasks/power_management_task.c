@@ -4,6 +4,7 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_timer.h"
 #include "global_state.h"
 #include "math.h"
 #include "mining.h"
@@ -99,6 +100,8 @@ void POWER_MANAGEMENT_task(void *pvParameters)
 
     uint16_t last_core_voltage = 0.0;
     uint16_t last_asic_frequency = power_management->frequency_value;
+    uint64_t last_temp_request = esp_timer_get_time();
+
     while (1) {
         uint16_t core_voltage = nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE);
         uint16_t asic_frequency = nvs_config_get_u16(NVS_CONFIG_ASIC_FREQ, CONFIG_ASIC_FREQUENCY);
@@ -116,6 +119,12 @@ void POWER_MANAGEMENT_task(void *pvParameters)
                 power_management->frequency_value = (float) asic_frequency;
             }
             last_asic_frequency = asic_frequency;
+        }
+
+        // request chip temps all 15s
+        if (esp_timer_get_time() - last_temp_request > 15000000llu) {
+            BM1368_request_chip_temp();
+            last_temp_request = esp_timer_get_time();
         }
 
         switch (GLOBAL_STATE->device_model) {

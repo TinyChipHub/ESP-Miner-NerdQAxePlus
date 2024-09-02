@@ -42,6 +42,8 @@ void BM1368_set_job_difficulty_mask(int);
 int BM1368_set_max_baud(void);
 int BM1368_set_default_baud(void);
 bool BM1368_send_hash_frequency(float frequency);
-void BM1368_proccess_work(task_result *result;);
+bool BM1368_process_work(task_result *result);
+bool BM1368_chip_temp_from_response(task_result *result, uint16_t *value, uint8_t *id);
+void BM1368_request_chip_temp();
 
 #endif /* BM1368_H_ */

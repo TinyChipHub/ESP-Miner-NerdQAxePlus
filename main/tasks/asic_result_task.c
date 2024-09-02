@@ -32,7 +32,19 @@ void ASIC_result_task(void *pvParameters)
         task_result asic_result;
 
         // get the result
-        (*GLOBAL_STATE->ASIC_functions.receive_result_fn)(&asic_result);
+        if (!(*GLOBAL_STATE->ASIC_functions.receive_result_fn)(&asic_result)) {
+            continue;
+        }
+
+        uint16_t temp = 0;
+        uint8_t id = 0;
+        if (BM1368_chip_temp_from_response(&asic_result, &temp, &id)) {
+            if (temp) {
+                float ftemp = (float) temp * 0.171342f - 299.5144f;
+                ESP_LOGI(TAG, "asic %d temp: %.3f", (int) id, ftemp);
+            }
+            continue;
+        }
 
         uint8_t asic_job_id = asic_result.job_id;
 

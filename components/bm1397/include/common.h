@@ -9,6 +9,8 @@ typedef struct __attribute__((__packed__))
     uint32_t nonce;
     uint32_t rolled_version;
     int asic_nr;
+    uint8_t job_id_raw;
+    uint8_t midstate_num;
 } task_result;
 
 typedef enum

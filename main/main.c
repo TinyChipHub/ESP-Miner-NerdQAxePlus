@@ -69,7 +69,7 @@ void app_main(void)
         ESP_LOGI(TAG, "ASIC: %dx BM1368 (%" PRIu64 " cores)", GLOBAL_STATE.asic_count, BM1368_CORE_COUNT);
         GLOBAL_STATE.asic_model = ASIC_BM1368;
         AsicFunctions ASIC_functions = {.init_fn = BM1368_init,
-                                        .receive_result_fn = BM1368_proccess_work,
+                                        .receive_result_fn = BM1368_process_work,
                                         .set_max_baud_fn = BM1368_set_max_baud,
                                         .set_difficulty_mask_fn = BM1368_set_job_difficulty_mask,
                                         .send_work_fn = BM1368_send_work,
