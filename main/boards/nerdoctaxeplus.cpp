@@ -16,6 +16,8 @@ NerdOctaxePlus::NerdOctaxePlus() : NerdQaxePlus() {
     m_maxVin = 13.0;
     m_minVin = 11.0;
 
+    m_asicJobIntervalMs = 750;
+
 #ifdef NERDOCTAXEPLUS
     m_theme = new ThemeNerdoctaxeplus();
 #endif
