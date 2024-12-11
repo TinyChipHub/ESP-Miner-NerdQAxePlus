@@ -31,7 +31,7 @@ NerdQaxePlus::NerdQaxePlus() : Board() {
     m_fanPerc = 100;
     m_numPhases = 2;
     m_imax = m_numPhases * 30;
-    m_ifault = (float) (m_imax - 5);
+    m_ifault = (float) (m_numPhases * 60); //(m_imax - 5);
 
     m_maxPin = 70.0;
     m_minPin = 30.0;

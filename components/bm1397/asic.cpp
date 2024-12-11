@@ -103,7 +103,7 @@ void Asic::sendReadAddress(void)
 // Function to set the hash frequency
 // gives the same PLL settings as the S21 dumps
 bool Asic::sendHashFrequency(float target_freq) {
-    float max_diff = 0.001;
+    float max_diff = 2.0;//0.001;
     uint8_t freqbuf[6] = {0x00, 0x08, 0x40, 0xA0, 0x02, 0x41};
     int postdiv_min = 255;
     int postdiv2_min = 255;
