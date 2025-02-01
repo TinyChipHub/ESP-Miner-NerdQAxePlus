@@ -58,6 +58,14 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.chipValues = this.chipValues.slice(0, this.asicCount);
   }
 
+  private getMedianValue(): number {
+    const sortedValues = [...this.chipValues].sort((a, b) => a - b);
+    const mid = Math.floor(sortedValues.length / 2);
+    return sortedValues.length % 2 !== 0
+      ? sortedValues[mid]
+      : (sortedValues[mid - 1] + sortedValues[mid]) / 2;
+  }
+
   private drawBalanceVisualization(): void {
     if (!this.ctx) {
       return;
@@ -100,7 +108,10 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
       this.ctx.stroke();
     }
 
+    const medianValue = this.getMedianValue();
     const chipPositions: { x: number; y: number; value: number }[] = [];
+    let faulty = false;
+    let warning = false;
 
     for (let i = 0; i < this.asicCount; i++) {
         const angle = (2 * Math.PI / this.asicCount) * i - Math.PI / 2;
@@ -108,6 +119,12 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
         const y = centerY + outerRadius * Math.sin(angle);
         const value = this.chipValues[i] || 0;
         chipPositions.push({ x, y, value });
+
+        if (value === 0) {
+          faulty = true;
+        } else if (Math.abs((value - medianValue) / medianValue) >= 0.05) {
+          warning = true;
+        }
     }
 
     // Draw the outer circle border
@@ -168,7 +185,7 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     // Draw the scaled center marker in purple (unchanged size)
     this.ctx.beginPath();
     this.ctx.arc(scaledCenterX, scaledCenterY, this.scaledMarkerRadius, 0, 2 * Math.PI);
-    this.ctx.fillStyle = '#8e44ad';
+    this.ctx.fillStyle = faulty ? '#ff0000' : warning ? '#ffa500' : '#8e44ad';
     this.ctx.fill();
     this.ctx.strokeStyle = '#71368a';
     this.ctx.stroke();
