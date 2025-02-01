@@ -8,7 +8,7 @@ import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, View
 export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChanges {
 
   @Input() nonceDistribution: number[] = [];
-  @Input() asicCount: number = 4;  
+  @Input() asicCount: number = 4;
   @Input() scalingExponent: number = 0.5;
 
   private chipValues: number[] = [];
@@ -106,7 +106,7 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
         const angle = (2 * Math.PI / this.asicCount) * i - Math.PI / 2;
         const x = centerX + outerRadius * Math.cos(angle);
         const y = centerY + outerRadius * Math.sin(angle);
-        const value = this.chipValues[i] || 300000;
+        const value = this.chipValues[i] || 0;
         chipPositions.push({ x, y, value });
     }
 
