@@ -46,24 +46,11 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
   }
 
   private updateChipValues(): void {
-    // Ensure the chip values array matches the ASIC count
     this.chipValues = [...this.nonceDistribution];
-
-    // If the array is shorter than the ASIC count, pad it with default values
     while (this.chipValues.length < this.asicCount) {
       this.chipValues.push(0);
     }
-
-    // Trim extra values if necessary
     this.chipValues = this.chipValues.slice(0, this.asicCount);
-  }
-
-  private getMedianValue(): number {
-    const sortedValues = [...this.chipValues].sort((a, b) => a - b);
-    const mid = Math.floor(sortedValues.length / 2);
-    return sortedValues.length % 2 !== 0
-      ? sortedValues[mid]
-      : (sortedValues[mid - 1] + sortedValues[mid]) / 2;
   }
 
   private drawBalanceVisualization(): void {
@@ -79,16 +66,12 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     const margin = 20;
     const outerRadius = (Math.min(width, height) / 2) - margin;
 
-    // Clear canvas before drawing
     this.ctx.clearRect(0, 0, width, height);
-
-    // Fill the circle
     this.ctx.beginPath();
     this.ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
     this.ctx.fillStyle = '#304562';
     this.ctx.fill();
 
-    // Radar rings
     this.ctx.strokeStyle = '#1f2d40';
     this.ctx.lineWidth = 1;
     for (let i = 1; i <= 3; i++) {
@@ -97,7 +80,6 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
       this.ctx.stroke();
     }
 
-    // Radar spokes
     for (let i = 0; i < this.asicCount; i++) {
       const angle = (2 * Math.PI / this.asicCount) * i;
       const xEnd = centerX + outerRadius * Math.cos(angle);
@@ -108,10 +90,8 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
       this.ctx.stroke();
     }
 
-    const medianValue = this.getMedianValue();
     const chipPositions: { x: number; y: number; value: number }[] = [];
     let faulty = false;
-    let warning = false;
 
     for (let i = 0; i < this.asicCount; i++) {
         const angle = (2 * Math.PI / this.asicCount) * i - Math.PI / 2;
@@ -122,12 +102,9 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
 
         if (value === 0) {
           faulty = true;
-        } else if (Math.abs((value - medianValue) / medianValue) >= 0.05) {
-          warning = true;
         }
     }
 
-    // Draw the outer circle border
     this.ctx.beginPath();
     this.ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
     this.ctx.strokeStyle = '#64b5f6';
@@ -182,15 +159,21 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.ctx.stroke();
     this.ctx.setLineDash([]);
 
+    const distance = Math.sqrt((scaledCenterX - centerX) ** 2 + (scaledCenterY - centerY) ** 2);
+    const gradientFactor = distance / outerRadius;
+    const red = Math.floor(gradientFactor * 255);
+    const green = Math.floor((1 - gradientFactor) * 255);
+    const color = faulty ? '#ff0000' : `rgb(${red}, ${green}, 0)`;
+
     // Draw the scaled center marker in purple (unchanged size)
     this.ctx.beginPath();
     this.ctx.arc(scaledCenterX, scaledCenterY, this.scaledMarkerRadius, 0, 2 * Math.PI);
-    this.ctx.fillStyle = faulty ? '#ff0000' : warning ? '#ffa500' : '#8e44ad';
+    this.ctx.fillStyle = color;
     this.ctx.fill();
     this.ctx.strokeStyle = '#71368a';
     this.ctx.stroke();
-
   }
+
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
