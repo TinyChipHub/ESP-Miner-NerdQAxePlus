@@ -8,6 +8,7 @@ import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, View
 export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChanges {
 
   @Input() nonceDistribution: number[] = [];
+  @Input() asicCount: number = 4;  
   @Input() scalingExponent: number = 0.5;
 
   private chipValues: number[] = [];
@@ -26,11 +27,7 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
   constructor() {}
 
   ngOnInit(): void {
-    if (this.nonceDistribution && this.nonceDistribution.length > 0) {
-      this.chipValues = [...this.nonceDistribution];
-    } else {
-      this.chipValues = Array(8).fill(300000);
-    }
+    this.updateChipValues();
   }
 
   ngAfterViewInit(): void {
@@ -39,13 +36,26 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['nonceDistribution'] && changes['nonceDistribution'].currentValue) {
-      this.chipValues = [...changes['nonceDistribution'].currentValue];
+    if (changes['nonceDistribution'] || changes['asicCount']) {
+      this.updateChipValues();
       this.drawWasserwage();
     }
     if (changes['scalingExponent']) {
       this.drawWasserwage();
     }
+  }
+
+  private updateChipValues(): void {
+    // Ensure the chip values array matches the ASIC count
+    this.chipValues = [...this.nonceDistribution];
+
+    // If the array is shorter than the ASIC count, pad it with default values
+    while (this.chipValues.length < this.asicCount) {
+      this.chipValues.push(0);
+    }
+
+    // Trim extra values if necessary
+    this.chipValues = this.chipValues.slice(0, this.asicCount);
   }
 
   private drawWasserwage(): void {
@@ -80,8 +90,8 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     }
 
     // Radar spokes
-    for (let i = 0; i < 8; i++) {
-      const angle = (2 * Math.PI / 8) * i;
+    for (let i = 0; i < this.asicCount; i++) {
+      const angle = (2 * Math.PI / this.asicCount) * i;
       const xEnd = centerX + outerRadius * Math.cos(angle);
       const yEnd = centerY + outerRadius * Math.sin(angle);
       this.ctx.beginPath();
@@ -90,11 +100,10 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
       this.ctx.stroke();
     }
 
-    const numChips = this.chipValues.length;
     const chipPositions: { x: number; y: number; value: number }[] = [];
 
-    for (let i = 0; i < numChips; i++) {
-        const angle = (2 * Math.PI / numChips) * i - Math.PI / 2;
+    for (let i = 0; i < this.asicCount; i++) {
+        const angle = (2 * Math.PI / this.asicCount) * i - Math.PI / 2;
         const x = centerX + outerRadius * Math.cos(angle);
         const y = centerY + outerRadius * Math.sin(angle);
         const value = this.chipValues[i] || 300000;
@@ -108,8 +117,8 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.ctx.lineWidth = 4;
     this.ctx.stroke();
 
-    for (let i = 0; i < numChips; i++) {
-      const angle = (2 * Math.PI / numChips) * i - Math.PI / 2;
+    for (let i = 0; i < this.asicCount; i++) {
+      const angle = (2 * Math.PI / this.asicCount) * i - Math.PI / 2;
       const x = centerX + outerRadius * Math.cos(angle);
       const y = centerY + outerRadius * Math.sin(angle);
 
