@@ -32,16 +32,16 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
 
   ngAfterViewInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
-    this.drawWasserwage();
+    this.drawBalanceVisualization();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['nonceDistribution'] || changes['asicCount']) {
       this.updateChipValues();
-      this.drawWasserwage();
+      this.drawBalanceVisualization();
     }
     if (changes['scalingExponent']) {
-      this.drawWasserwage();
+      this.drawBalanceVisualization();
     }
   }
 
@@ -58,7 +58,7 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.chipValues = this.chipValues.slice(0, this.asicCount);
   }
 
-  private drawWasserwage(): void {
+  private drawBalanceVisualization(): void {
     if (!this.ctx) {
       return;
     }
@@ -182,7 +182,7 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     const y = event.clientY - rect.top;
 
     // Show tooltip on hover
-    this.tooltipText = this.chipValues.join(' / '); // Format as "123 / 126 / 200 / 100"
+    this.tooltipText = this.chipValues.join('/'); // Format as "123/126/200/100"
     this.tooltipX = x + 10;
     this.tooltipY = y - 10;
     this.tooltipVisible = true;
