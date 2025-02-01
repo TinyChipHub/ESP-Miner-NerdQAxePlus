@@ -181,7 +181,14 @@
                             valueTemplate="{value}V"></p-knob>
                         ASIC Voltage Measured
                     </div>
-
+                    <div class="col-6" *ngIf="info.asicCount > 1">
+                        <div>
+                            <app-nonce-distribution [nonceDistribution]="info.nonceDistribution"></app-nonce-distribution>
+                        </div>
+                        <div>
+                            <span>Nonce Distribution</span>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -219,6 +226,11 @@
         </div>
 
 
+        <div class="col-12 lg:col-6">
+            <div class="card">
+                <app-nonce-distribution [nonceDistribution]="info.nonceDistribution"></app-nonce-distribution>
+            </div>
+        </div>
     </div>
 
 

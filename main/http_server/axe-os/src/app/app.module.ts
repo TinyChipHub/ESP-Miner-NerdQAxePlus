@@ -17,6 +17,7 @@ import { LogsComponent } from './components/logs/logs.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { SwarmComponent } from './components/swarm/swarm.component';
 import { InfluxdbComponent } from './components/influxdb/influxdb.component';
+import { NonceDistributionComponent } from './components/nonce-distribution/nonce-distribution.component';
 import { AppLayoutModule } from './layout/app.layout.module';
 import { ANSIPipe } from './pipes/ansi.pipe';
 import { DateAgoPipe } from './pipes/date-ago.pipe';
@@ -32,7 +33,8 @@ const components = [
   LoadingComponent,
   SettingsComponent,
   InfluxdbComponent,
-  LogsComponent
+  LogsComponent,
+  NonceDistributionComponent
 ];
 
 @NgModule({

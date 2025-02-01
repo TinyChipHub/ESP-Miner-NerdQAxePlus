@@ -675,6 +675,14 @@ static esp_err_t GET_system_info(httpd_req_t *req)
         cJSON_AddItemToObject(root, "history", history);
     }
 
+    // add nonce distribution to info response
+    NonceDistribution *distribution = history->getNonceDistribution();
+    cJSON *array = cJSON_CreateArray();
+    for (int i=0;i<distribution->getNumAsics();i++) {
+        cJSON_AddItemToArray(array, cJSON_CreateNumber((int)(distribution->getShares(i))));
+    }
+    cJSON_AddItemToObject(root, "nonceDistribution", array);
+
     free(ssid);
     free(hostname);
     free(stratumURL);

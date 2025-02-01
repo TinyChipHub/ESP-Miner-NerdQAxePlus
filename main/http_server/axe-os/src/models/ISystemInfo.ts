@@ -52,5 +52,7 @@ export interface ISystemInfo {
     boardtemp2?: number,
     overheat_temp: number,
 
+    nonceDistribution: number[],
+
     history: IHistory
 }

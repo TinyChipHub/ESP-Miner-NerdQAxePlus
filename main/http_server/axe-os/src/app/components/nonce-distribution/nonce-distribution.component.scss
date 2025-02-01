@@ -1,0 +1,20 @@
+.nonce-distribution {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tooltip-container {
+    position: relative;
+  }
+
+  .tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    white-space: nowrap;
+  }

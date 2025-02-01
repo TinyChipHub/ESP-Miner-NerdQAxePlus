@@ -53,6 +53,7 @@ const defaultInfo: ISystemInfo = {
   autoscreenoff: 0,
   lastResetReason: "Unknown",
   jobInterval: 1200,
+  nonceDistribution: [299765, 300938, 302265, 300071],
 
   boardtemp1: 30,
   boardtemp2: 40,

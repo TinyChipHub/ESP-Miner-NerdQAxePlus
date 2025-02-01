@@ -18,6 +18,17 @@ class NonceDistribution {
     void init(int numAsics);
     void addShare(int asicNr);
     void toLog();
+
+    int getNumAsics() {
+      return m_numAsics;
+    }
+
+    int getShares(int asicNr) {
+      if (asicNr < 0 || asicNr >= m_numAsics) {
+        return 0;
+      }
+      return m_distribution[asicNr];
+    }
 };
 
 class HistoryAvg {
@@ -94,4 +105,8 @@ class History {
     {
         return m_numSamples;
     };
+
+    NonceDistribution* getNonceDistribution() {
+      return &m_distribution;
+    }
 };
