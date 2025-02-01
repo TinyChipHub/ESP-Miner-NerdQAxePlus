@@ -159,15 +159,43 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.ctx.stroke();
     this.ctx.setLineDash([]);
 
+    // 1. Compute standard deviation
+    const mean = this.chipValues.reduce((sum, v) => sum + v, 0) / this.asicCount;
+    let variance = 0;
+    for (let i = 0; i < this.asicCount; i++) {
+        const diff = this.chipValues[i] - mean;
+        variance += diff * diff;
+    }
+    variance /= this.asicCount;  // or (this.asicCount - 1) for sample variance
+    const stdDev = Math.sqrt(variance);
+
+    // 2. Map the stdDev to a radius so that:
+    //    - Higher stdDev => bigger ball
+    //    - Lower stdDev  => smaller ball
+    const minRadius = this.scaledMarkerRadius;
+    const maxRadius = 50;
+    const stdDevRange = 1000;  // an upper bound for your typical stdDev
+
+    // Clamp the stdDev to avoid extreme outliers
+    const clampedStdDev = Math.min(stdDev, stdDevRange);
+
+    // ratio goes from 0 (if stdDev = 0) to 1 (if stdDev >= stdDevRange)
+    const ratio = clampedStdDev / stdDevRange;
+
+    // dynamicRadius goes from minRadius (when stdDev = 0) to maxRadius
+    // (when stdDev = stdDevRange or more)
+    const dynamicRadius = minRadius + (maxRadius - minRadius) * ratio;
+
+    // 3. Use `dynamicRadius` for your circle
     const distance = Math.sqrt((scaledCenterX - centerX) ** 2 + (scaledCenterY - centerY) ** 2);
     const gradientFactor = distance / outerRadius;
     const red = Math.floor(gradientFactor * 255);
     const green = Math.floor((1 - gradientFactor) * 255);
+
     const color = faulty ? '#ff0000' : `rgb(${red}, ${green}, 0)`;
 
-    // Draw the scaled center marker in purple (unchanged size)
     this.ctx.beginPath();
-    this.ctx.arc(scaledCenterX, scaledCenterY, this.scaledMarkerRadius, 0, 2 * Math.PI);
+    this.ctx.arc(scaledCenterX, scaledCenterY, dynamicRadius, 0, 2 * Math.PI);
     this.ctx.fillStyle = color;
     this.ctx.fill();
     this.ctx.strokeStyle = '#71368a';
