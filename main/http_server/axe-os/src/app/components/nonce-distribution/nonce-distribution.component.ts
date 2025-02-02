@@ -53,54 +53,32 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.chipValues = this.chipValues.slice(0, this.asicCount);
   }
 
-      // Example method to compute a "quality percent" using normalized stdDev
-    private computeQualityNormalized(chipValues: number[]): number {
-    // 1) Handle edge case: if no values or all zero, just return 0% or 100% or your choice
-    if (!chipValues.length) {
-      return 0;
+  private calculateCV(chipValues: number[]): number {
+    // Überprüfen, ob das Array leer ist
+    if (chipValues.length === 0) {
+      throw new Error("chipValues is empty");
     }
 
-    // 2) Find min and max in the data
-    const minVal = Math.min(...chipValues);
-    const maxVal = Math.max(...chipValues);
+    // Berechnung des Mittelwerts
+    const mean: number = chipValues.reduce((acc, value) => acc + value, 0) / chipValues.length;
 
-    // If all values are the same, min == max, so there's no spread
-    if (minVal === maxVal) {
-      // That means perfect uniform data => 100% quality
-      return 100;
+    // Prüfen, ob der Mittelwert 0 ist, da dies zu einer Division durch 0 führen würde
+    if (mean === 0) {
+      throw new Error("average is 0");
     }
 
-    // 3) Normalize each value to [0..1] using min–max
-    // normalizedValue = (value - minVal) / (maxVal - minVal)
-    const range = maxVal - minVal;
-    const normalizedValues = chipValues.map(v => (v - minVal) / range);
+    // Berechnung der Varianz
+    const variance: number =
+      chipValues.reduce((acc, value) => acc + Math.pow(value - mean, 2), 0) / chipValues.length;
 
-    // 4) Compute stdDev of these normalized values
-    //    (Mean of normalized array => variance => sqrt => stdDev)
-    const normMean = normalizedValues.reduce((acc, v) => acc + v, 0) / normalizedValues.length;
+    // Standardabweichung
+    const stdDev: number = Math.sqrt(variance);
 
-    let normVariance = 0;
-    normalizedValues.forEach(val => {
-      const diff = val - normMean;
-      normVariance += diff * diff;
-    });
-    normVariance /= normalizedValues.length; // or (length - 1) for sample variance
-    const normStdDev = Math.sqrt(normVariance);
-
-    // 5) Decide on a "max" stdDev in normalized space for 0% quality.
-    //    For min–max normalized data, the largest possible spread often occurs
-    //    if half the points are at 0 and half are at 1, yielding stdDev near ~0.5 for big samples.
-    //    We'll pick 0.5 as a typical "worst-case" for 4 chips.
-    const maxStdDevNormalized = 0.5;
-
-    // 6) Convert this normalized stdDev to a 0..100% "quality" scale
-    //    If normStdDev >= 0.5 => 0% quality, if normStdDev = 0 => 100% quality
-    const rawQuality = 1 - (normStdDev / maxStdDevNormalized);
-    const clampedQuality = Math.max(0, rawQuality); // ensure it doesn't go negative
-    const qualityPercent = clampedQuality * 100;
-
-    return qualityPercent;
+    // Variationskoeffizient (CV) berechnen
+    const cv: number = stdDev / Math.abs(mean);
+    return cv;
   }
+
 
   private drawBalanceVisualization(): void {
     if (!this.ctx) {
@@ -210,16 +188,20 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.ctx.stroke();
     this.ctx.setLineDash([]);
 
-    const qualityPercent = this.computeQualityNormalized(this.chipValues);
+    let cvPercent = 100.0; // Default: 100%
+    try {
+        cvPercent = Math.min(this.calculateCV(this.chipValues), 1.0) * 100.0;
+    } catch {
+        // ignore
+    }
 
-    console.log(`Quality: ${qualityPercent.toFixed(2)}%`);
+    // 100% = maxRadius
+    // 0% = minRadius
+    const minRadius = 6;
+    const maxRadius = outerRadius - 2;
 
-    const qualityFraction = qualityPercent / 100;  // e.g. 0.0 → 1.0
-    const minRadius = 3;    // radius at 100% quality
-    const maxRadius = 50;   // radius at 0% quality
+    const radius = (cvPercent / 100) * (maxRadius - minRadius) + minRadius;
 
-    const radius = minRadius
-    + (maxRadius - minRadius) * (1 - qualityFraction);
 
     // 3. Use `dynamicRadius` for your circle
     const distance = Math.sqrt((scaledCenterX - centerX) ** 2 + (scaledCenterY - centerY) ** 2);

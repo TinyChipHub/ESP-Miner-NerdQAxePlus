@@ -679,7 +679,13 @@ static esp_err_t GET_system_info(httpd_req_t *req)
     NonceDistribution *distribution = history->getNonceDistribution();
     cJSON *array = cJSON_CreateArray();
     for (int i=0;i<distribution->getNumAsics();i++) {
-        cJSON_AddItemToArray(array, cJSON_CreateNumber((int)(distribution->getShares(i))));
+        if (i == 3 && 0) {
+            //cJSON_AddItemToArray(array, cJSON_CreateNumber(0));
+            cJSON_AddItemToArray(array, cJSON_CreateNumber((int)(distribution->getShares(i))/1));
+        } else {
+            cJSON_AddItemToArray(array, cJSON_CreateNumber((int)(distribution->getShares(i))));
+
+        }
     }
     cJSON_AddItemToObject(root, "nonceDistribution", array);
 
@@ -688,7 +694,7 @@ static esp_err_t GET_system_info(httpd_req_t *req)
     free(stratumURL);
     free(stratumUser);
 
-    const char *sys_info = cJSON_Print(root);
+    const char *sys_info = cJSON_PrintUnformatted(root);
     httpd_resp_sendstr(req, sys_info);
     free((void*) sys_info);
     cJSON_Delete(root);
@@ -730,7 +736,7 @@ static esp_err_t GET_influx_info(httpd_req_t *req)
     free(influxOrg);
     free(influxPrefix);
 
-    const char *influx_info = cJSON_Print(root);
+    const char *influx_info = cJSON_PrintUnformatted(root);
     httpd_resp_sendstr(req, influx_info);
     free((char*) influx_info);
     cJSON_Delete(root);
