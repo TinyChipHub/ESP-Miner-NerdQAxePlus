@@ -53,6 +53,55 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.chipValues = this.chipValues.slice(0, this.asicCount);
   }
 
+      // Example method to compute a "quality percent" using normalized stdDev
+    private computeQualityNormalized(chipValues: number[]): number {
+    // 1) Handle edge case: if no values or all zero, just return 0% or 100% or your choice
+    if (!chipValues.length) {
+      return 0;
+    }
+
+    // 2) Find min and max in the data
+    const minVal = Math.min(...chipValues);
+    const maxVal = Math.max(...chipValues);
+
+    // If all values are the same, min == max, so there's no spread
+    if (minVal === maxVal) {
+      // That means perfect uniform data => 100% quality
+      return 100;
+    }
+
+    // 3) Normalize each value to [0..1] using min–max
+    // normalizedValue = (value - minVal) / (maxVal - minVal)
+    const range = maxVal - minVal;
+    const normalizedValues = chipValues.map(v => (v - minVal) / range);
+
+    // 4) Compute stdDev of these normalized values
+    //    (Mean of normalized array => variance => sqrt => stdDev)
+    const normMean = normalizedValues.reduce((acc, v) => acc + v, 0) / normalizedValues.length;
+
+    let normVariance = 0;
+    normalizedValues.forEach(val => {
+      const diff = val - normMean;
+      normVariance += diff * diff;
+    });
+    normVariance /= normalizedValues.length; // or (length - 1) for sample variance
+    const normStdDev = Math.sqrt(normVariance);
+
+    // 5) Decide on a "max" stdDev in normalized space for 0% quality.
+    //    For min–max normalized data, the largest possible spread often occurs
+    //    if half the points are at 0 and half are at 1, yielding stdDev near ~0.5 for big samples.
+    //    We'll pick 0.5 as a typical "worst-case" for 4 chips.
+    const maxStdDevNormalized = 0.5;
+
+    // 6) Convert this normalized stdDev to a 0..100% "quality" scale
+    //    If normStdDev >= 0.5 => 0% quality, if normStdDev = 0 => 100% quality
+    const rawQuality = 1 - (normStdDev / maxStdDevNormalized);
+    const clampedQuality = Math.max(0, rawQuality); // ensure it doesn't go negative
+    const qualityPercent = clampedQuality * 100;
+
+    return qualityPercent;
+  }
+
   private drawBalanceVisualization(): void {
     if (!this.ctx) {
       return;
@@ -66,7 +115,9 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     const margin = 20;
     const outerRadius = (Math.min(width, height) / 2) - margin;
 
+    // clear first
     this.ctx.clearRect(0, 0, width, height);
+
     this.ctx.beginPath();
     this.ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
     this.ctx.fillStyle = '#304562';
@@ -159,32 +210,16 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
     this.ctx.stroke();
     this.ctx.setLineDash([]);
 
-    // 1. Compute standard deviation
-    const mean = this.chipValues.reduce((sum, v) => sum + v, 0) / this.asicCount;
-    let variance = 0;
-    for (let i = 0; i < this.asicCount; i++) {
-        const diff = this.chipValues[i] - mean;
-        variance += diff * diff;
-    }
-    variance /= this.asicCount;  // or (this.asicCount - 1) for sample variance
-    const stdDev = Math.sqrt(variance);
+    const qualityPercent = this.computeQualityNormalized(this.chipValues);
 
-    // 2. Map the stdDev to a radius so that:
-    //    - Higher stdDev => bigger ball
-    //    - Lower stdDev  => smaller ball
-    const minRadius = this.scaledMarkerRadius;
-    const maxRadius = 50;
-    const stdDevRange = 1000;  // an upper bound for your typical stdDev
+    console.log(`Quality: ${qualityPercent.toFixed(2)}%`);
 
-    // Clamp the stdDev to avoid extreme outliers
-    const clampedStdDev = Math.min(stdDev, stdDevRange);
+    const qualityFraction = qualityPercent / 100;  // e.g. 0.0 → 1.0
+    const minRadius = 3;    // radius at 100% quality
+    const maxRadius = 50;   // radius at 0% quality
 
-    // ratio goes from 0 (if stdDev = 0) to 1 (if stdDev >= stdDevRange)
-    const ratio = clampedStdDev / stdDevRange;
-
-    // dynamicRadius goes from minRadius (when stdDev = 0) to maxRadius
-    // (when stdDev = stdDevRange or more)
-    const dynamicRadius = minRadius + (maxRadius - minRadius) * ratio;
+    const radius = minRadius
+    + (maxRadius - minRadius) * (1 - qualityFraction);
 
     // 3. Use `dynamicRadius` for your circle
     const distance = Math.sqrt((scaledCenterX - centerX) ** 2 + (scaledCenterY - centerY) ** 2);
@@ -194,12 +229,19 @@ export class NonceDistributionComponent implements OnInit, AfterViewInit, OnChan
 
     const color = faulty ? '#ff0000' : `rgb(${red}, ${green}, 0)`;
 
+    this.ctx.save();  // save current drawing state
     this.ctx.beginPath();
-    this.ctx.arc(scaledCenterX, scaledCenterY, dynamicRadius, 0, 2 * Math.PI);
+    this.ctx.arc(centerX, centerY, outerRadius - 2, 0, 2 * Math.PI);
+    this.ctx.clip();  // anything drawn outside this circle won't appear
+
+    this.ctx.beginPath();
+    this.ctx.arc(scaledCenterX, scaledCenterY, radius, 0, 2 * Math.PI);
     this.ctx.fillStyle = color;
     this.ctx.fill();
     this.ctx.strokeStyle = '#71368a';
     this.ctx.stroke();
+
+    this.ctx.restore();
   }
 
 
