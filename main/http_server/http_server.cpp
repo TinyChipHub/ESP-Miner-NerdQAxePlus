@@ -190,6 +190,7 @@ static esp_err_t is_network_allowed(httpd_req_t * req)
 
         // check if origin is hostname
         const char *hostname = SYSTEM_MODULE.getHostname();
+        ESP_LOGI(CORS_TAG, "hostname: %s", hostname);
         if (!(strncmp(host, hostname, strlen(hostname)))) {
             ESP_LOGI(CORS_TAG, "origin equals hostname");
             return ESP_OK;
@@ -328,7 +329,7 @@ static esp_err_t rest_common_get_handler(httpd_req_t *req)
         httpd_resp_set_hdr(req, "Cache-Control", "max-age=2592000");
     }
 
-    httpd_resp_set_hdr(req, "Content-Encoding", "gzip"); 
+    httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
 
     char *chunk = rest_context->scratch;
     ssize_t read_bytes;
@@ -384,7 +385,7 @@ static esp_err_t PATCH_update_swarm(httpd_req_t *req)
     }
     buf[total_len] = '\0';
 
-    nvs_config_set_string(NVS_CONFIG_SWARM, buf);
+    CONFIG.setSwarmConfig(buf);
     httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
 }
@@ -442,67 +443,67 @@ static esp_err_t PATCH_update_settings(httpd_req_t *req)
     cJSON *root = cJSON_Parse(buf);
     cJSON *item;
     if ((item = cJSON_GetObjectItem(root, "stratumURL")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_STRATUM_URL, item->valuestring);
+        CONFIG.setStratumURL(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "stratumUser")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_STRATUM_USER, item->valuestring);
+        CONFIG.setStratumUser(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "stratumPassword")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_STRATUM_PASS, item->valuestring);
+        CONFIG.setStratumPass(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "stratumPort")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_STRATUM_PORT, item->valueint);
+        CONFIG.setStratumPort(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "fallbackStratumURL")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_STRATUM_FALLBACK_URL, item->valuestring);
+        CONFIG.setStratumFallbackURL(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "fallbackStratumUser")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_STRATUM_FALLBACK_USER, item->valuestring);
+        CONFIG.setStratumFallbackUser(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "fallbackStratumPassword")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_STRATUM_FALLBACK_PASS, item->valuestring);
+        CONFIG.setStratumFallbackPass(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "fallbackStratumPort")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_STRATUM_FALLBACK_PORT, item->valueint);
+        CONFIG.setStratumFallbackPort(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "ssid")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_WIFI_SSID, item->valuestring);
+        CONFIG.setWifiSSID(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "wifiPass")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_WIFI_PASS, item->valuestring);
+        CONFIG.setWifiPass(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "hostname")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_HOSTNAME, item->valuestring);
+        CONFIG.setHostname(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "coreVoltage")) != NULL && item->valueint > 0) {
-        nvs_config_set_u16(NVS_CONFIG_ASIC_VOLTAGE, item->valueint);
+        CONFIG.setAsicVoltage(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "frequency")) != NULL && item->valueint > 0) {
-        nvs_config_set_u16(NVS_CONFIG_ASIC_FREQ, item->valueint);
+        CONFIG.setAsicFreq(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "jobInterval")) != NULL && item->valueint > 0) {
-        nvs_config_set_u16(NVS_CONFIG_ASIC_JOB_INTERVAL, item->valueint);
+        CONFIG.setAsicJobInterval(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "flipscreen")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_FLIP_SCREEN, item->valueint);
+        CONFIG.setFlipScreen(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "overheat_temp")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_OVERHEAT_TEMP, item->valueint);
+        CONFIG.setOverheatTemp(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "invertscreen")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_INVERT_SCREEN, item->valueint);
+        CONFIG.setInvertScreen(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "invertfanpolarity")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_INVERT_FAN_POLARITY, item->valueint);
+        CONFIG.setInvertFanPolarity(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "autofanspeed")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_AUTO_FAN_SPEED, item->valueint);
+        CONFIG.setAutoFanSpeed(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "fanspeed")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_FAN_SPEED, item->valueint);
+        CONFIG.setFanSpeed(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "autoscreenoff")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_AUTO_SCREEN_OFF, item->valueint);
+        CONFIG.setAutoScreenOff(item->valueint);
     }
 
     cJSON_Delete(root);
@@ -550,25 +551,25 @@ static esp_err_t PATCH_update_influx(httpd_req_t *req)
     cJSON *root = cJSON_Parse(buf);
     cJSON *item;
     if ((item = cJSON_GetObjectItem(root, "influxEnable")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_INFLUX_ENABLE, item->valueint);
+        CONFIG.setInfluxEnable(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "influxURL")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_INFLUX_URL, item->valuestring);
+        CONFIG.setInfluxURL(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "influxPort")) != NULL) {
-        nvs_config_set_u16(NVS_CONFIG_INFLUX_PORT, item->valueint);
+        CONFIG.setInfluxPort(item->valueint);
     }
     if ((item = cJSON_GetObjectItem(root, "influxToken")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_INFLUX_TOKEN, item->valuestring);
+        CONFIG.setInfluxToken(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "influxBucket")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_INFLUX_BUCKET, item->valuestring);
+        CONFIG.setInfluxToken(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "influxOrg")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_INFLUX_ORG, item->valuestring);
+        CONFIG.setInfluxOrg(item->valuestring);
     }
     if ((item = cJSON_GetObjectItem(root, "influxPrefix")) != NULL) {
-        nvs_config_set_string(NVS_CONFIG_INFLUX_PREFIX, item->valuestring);
+        CONFIG.setInfluxPrefix(item->valuestring);
     }
 
     cJSON_Delete(root);
@@ -612,9 +613,8 @@ static esp_err_t GET_swarm(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    char *swarm_config = nvs_config_get_string(NVS_CONFIG_SWARM, "[]");
+    const char *swarm_config = CONFIG.getSwarmConfig();
     httpd_resp_sendstr(req, swarm_config);
-    free(swarm_config);
     return ESP_OK;
 }
 
@@ -653,14 +653,6 @@ static esp_err_t GET_system_info(httpd_req_t *req)
     }
 
     // Gather system info as before
-    char *ssid = nvs_config_get_string(NVS_CONFIG_WIFI_SSID, CONFIG_ESP_WIFI_SSID);
-    char *hostname = nvs_config_get_string(NVS_CONFIG_HOSTNAME, CONFIG_LWIP_LOCAL_HOSTNAME);
-
-    char *stratumURL = nvs_config_get_string(NVS_CONFIG_STRATUM_URL, CONFIG_STRATUM_URL);
-    char *stratumUser = nvs_config_get_string(NVS_CONFIG_STRATUM_USER, CONFIG_STRATUM_USER);
-
-    char *fallbackStratumURL = nvs_config_get_string(NVS_CONFIG_STRATUM_FALLBACK_URL, CONFIG_STRATUM_FALLBACK_URL);
-    char *fallbackStratumUser = nvs_config_get_string(NVS_CONFIG_STRATUM_FALLBACK_USER, CONFIG_STRATUM_FALLBACK_USER);
 
     Board* board = SYSTEM_MODULE.getBoard();
     History* history = SYSTEM_MODULE.getHistory();
@@ -685,11 +677,11 @@ static esp_err_t GET_system_info(httpd_req_t *req)
     cJSON_AddStringToObject(root, "bestSessionDiff", SYSTEM_MODULE.getBestSessionDiffString());
 
     cJSON_AddNumberToObject(root, "freeHeap", esp_get_free_heap_size());
-    cJSON_AddNumberToObject(root, "coreVoltage", nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE));
+    cJSON_AddNumberToObject(root, "coreVoltage", CONFIG.getAsicVoltage());
     cJSON_AddNumberToObject(root, "coreVoltageActual", (int) (board->getVout() * 1000.0f));
-    cJSON_AddNumberToObject(root, "frequency", nvs_config_get_u16(NVS_CONFIG_ASIC_FREQ, CONFIG_ASIC_FREQUENCY));
-    cJSON_AddStringToObject(root, "ssid", ssid);
-    cJSON_AddStringToObject(root, "hostname", hostname);
+    cJSON_AddNumberToObject(root, "frequency", CONFIG.getAsicFreq());
+    cJSON_AddStringToObject(root, "ssid", CONFIG.getWifiSSID());
+    cJSON_AddStringToObject(root, "hostname", CONFIG.getHostname());
     cJSON_AddStringToObject(root, "wifiStatus", SYSTEM_MODULE.getWifiStatus());
     cJSON_AddNumberToObject(root, "sharesAccepted", SYSTEM_MODULE.getSharesAccepted());
     cJSON_AddNumberToObject(root, "sharesRejected", SYSTEM_MODULE.getSharesRejected());
@@ -697,22 +689,23 @@ static esp_err_t GET_system_info(httpd_req_t *req)
     cJSON_AddNumberToObject(root, "asicCount", board->getAsicCount());
     cJSON_AddNumberToObject(root, "smallCoreCount", (board->getAsics()) ? board->getAsics()->getSmallCoreCount() : 0);
     cJSON_AddStringToObject(root, "ASICModel", board->getAsicModel());
-    cJSON_AddStringToObject(root, "deviceModel", board->getDeviceModel());
-    cJSON_AddStringToObject(root, "stratumURL", stratumURL);
-    cJSON_AddNumberToObject(root, "stratumPort", nvs_config_get_u16(NVS_CONFIG_STRATUM_PORT, CONFIG_STRATUM_PORT));
-    cJSON_AddStringToObject(root, "stratumUser", stratumUser);
-    cJSON_AddStringToObject(root, "fallbackStratumURL", fallbackStratumURL);
-    cJSON_AddNumberToObject(root, "fallbackStratumPort", nvs_config_get_u16(NVS_CONFIG_STRATUM_FALLBACK_PORT, CONFIG_STRATUM_FALLBACK_PORT));
-    cJSON_AddStringToObject(root, "fallbackStratumUser", fallbackStratumUser);
+    cJSON_AddStringToObject(root, "deviceModel", board->getDeviceModel()
+    );
+    cJSON_AddStringToObject(root, "stratumURL", CONFIG.getStratumURL());
+    cJSON_AddNumberToObject(root, "stratumPort", CONFIG.getStratumPort());
+    cJSON_AddStringToObject(root, "stratumUser", CONFIG.getStratumUser());
+    cJSON_AddStringToObject(root, "fallbackStratumURL", CONFIG.getStratumFallbackURL());
+    cJSON_AddNumberToObject(root, "fallbackStratumPort", CONFIG.getStratumFallbackPort());
+    cJSON_AddStringToObject(root, "fallbackStratumUser", CONFIG.getStratumFallbackUser());
     cJSON_AddNumberToObject(root, "isUsingFallbackStratum", STRATUM_MANAGER.isUsingFallback());
     cJSON_AddStringToObject(root, "version", esp_ota_get_app_description()->version);
     cJSON_AddStringToObject(root, "runningPartition", esp_ota_get_running_partition()->label);
-    cJSON_AddNumberToObject(root, "flipscreen", nvs_config_get_u16(NVS_CONFIG_FLIP_SCREEN, 1));
-    cJSON_AddNumberToObject(root, "overheat_temp", nvs_config_get_u16(NVS_CONFIG_OVERHEAT_TEMP, 0));
-    cJSON_AddNumberToObject(root, "invertscreen", nvs_config_get_u16(NVS_CONFIG_INVERT_SCREEN, 0));
-    cJSON_AddNumberToObject(root, "autoscreenoff", nvs_config_get_u16(NVS_CONFIG_AUTO_SCREEN_OFF, 0));
-    cJSON_AddNumberToObject(root, "invertfanpolarity", nvs_config_get_u16(NVS_CONFIG_INVERT_FAN_POLARITY, 1));
-    cJSON_AddNumberToObject(root, "autofanspeed", nvs_config_get_u16(NVS_CONFIG_AUTO_FAN_SPEED, 1));
+    cJSON_AddNumberToObject(root, "flipscreen", (int) CONFIG.isFlipScreen());
+    cJSON_AddNumberToObject(root, "overheat_temp", CONFIG.getOverheatTemp());
+    cJSON_AddNumberToObject(root, "invertscreen", (int) CONFIG.isInvertScreen());
+    cJSON_AddNumberToObject(root, "autoscreenoff", (int) CONFIG.isAutoScreenOff());
+    cJSON_AddNumberToObject(root, "invertfanpolarity", (int) CONFIG.isInvertFanPolarity());
+    cJSON_AddNumberToObject(root, "autofanspeed", (int) CONFIG.isAutoFanSpeed());
     cJSON_AddNumberToObject(root, "fanspeed", POWER_MANAGEMENT_MODULE.getFanPerc());
     cJSON_AddNumberToObject(root, "fanrpm", POWER_MANAGEMENT_MODULE.getFanRPM());
     cJSON_AddStringToObject(root, "lastResetReason", SYSTEM_MODULE.getLastResetReason());
@@ -722,13 +715,6 @@ static esp_err_t GET_system_info(httpd_req_t *req)
         cJSON *history = get_history_data(start_timestamp, end_timestamp, current_timestamp);
         cJSON_AddItemToObject(root, "history", history);
     }
-
-    free(ssid);
-    free(hostname);
-    free(stratumURL);
-    free(stratumUser);
-    free(fallbackStratumURL);
-    free(fallbackStratumUser);
 
     const char *sys_info = cJSON_PrintUnformatted(root);
     httpd_resp_sendstr(req, sys_info);
@@ -753,24 +739,14 @@ static esp_err_t GET_influx_info(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    char *influxURL = nvs_config_get_string(NVS_CONFIG_INFLUX_URL, CONFIG_INFLUX_URL);
-    char *influxBucket = nvs_config_get_string(NVS_CONFIG_INFLUX_BUCKET, CONFIG_INFLUX_BUCKET);
-    char *influxOrg = nvs_config_get_string(NVS_CONFIG_INFLUX_ORG, CONFIG_INFLUX_ORG);
-    char *influxPrefix = nvs_config_get_string(NVS_CONFIG_INFLUX_PREFIX, CONFIG_INFLUX_PREFIX);
-
     cJSON *root = cJSON_CreateObject();
 
-    cJSON_AddStringToObject(root, "influxURL", influxURL);
-    cJSON_AddNumberToObject(root, "influxPort", nvs_config_get_u16(NVS_CONFIG_INFLUX_PORT, CONFIG_INFLUX_PORT));
-    cJSON_AddStringToObject(root, "influxBucket", influxBucket);
-    cJSON_AddStringToObject(root, "influxOrg", influxOrg);
-    cJSON_AddStringToObject(root, "influxPrefix", influxPrefix);
-    cJSON_AddNumberToObject(root, "influxEnable", nvs_config_get_u16(NVS_CONFIG_INFLUX_ENABLE, 1));
-
-    free(influxURL);
-    free(influxBucket);
-    free(influxOrg);
-    free(influxPrefix);
+    cJSON_AddStringToObject(root, "influxURL", CONFIG.getInfluxURL());
+    cJSON_AddNumberToObject(root, "influxPort", CONFIG.getInfluxPort());
+    cJSON_AddStringToObject(root, "influxBucket", CONFIG.getInfluxBucket());
+    cJSON_AddStringToObject(root, "influxOrg", CONFIG.getInfluxOrg());
+    cJSON_AddStringToObject(root, "influxPrefix", CONFIG.getInfluxPrefix());
+    cJSON_AddNumberToObject(root, "influxEnable", (int) CONFIG.isInfluxEnabled());
 
     const char *influx_info = cJSON_PrintUnformatted(root);
     httpd_resp_sendstr(req, influx_info);

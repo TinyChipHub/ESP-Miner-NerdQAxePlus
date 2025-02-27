@@ -5,7 +5,6 @@
 #include "freertos/task.h"
 
 #include "global_state.h"
-#include "nvs_config.h"
 #include "influx_task.h"
 
 static const char *TAG = "influx_task";
@@ -99,19 +98,19 @@ void influx_task(void *pvParameters)
 {
     System *module = &SYSTEM_MODULE;
 
-    int influxEnable = nvs_config_get_u16(NVS_CONFIG_INFLUX_ENABLE, CONFIG_INFLUX_ENABLE);
+    int influxEnable = (int) CONFIG.isInfluxEnabled();
 
     if (!influxEnable) {
         ESP_LOGI(TAG, "InfluxDB is not enabled.");
         forever();
     }
 
-    char *influxURL = nvs_config_get_string(NVS_CONFIG_INFLUX_URL, CONFIG_INFLUX_URL);
-    int influxPort = nvs_config_get_u16(NVS_CONFIG_INFLUX_PORT, CONFIG_INFLUX_PORT);
-    char *influxToken = nvs_config_get_string(NVS_CONFIG_INFLUX_TOKEN, CONFIG_INFLUX_TOKEN);
-    char *influxBucket = nvs_config_get_string(NVS_CONFIG_INFLUX_BUCKET, CONFIG_INFLUX_BUCKET);
-    char *influxOrg = nvs_config_get_string(NVS_CONFIG_INFLUX_ORG, CONFIG_INFLUX_ORG);
-    char *influxPrefix = nvs_config_get_string(NVS_CONFIG_INFLUX_PREFIX, CONFIG_INFLUX_PREFIX);
+    const char *influxURL = CONFIG.getInfluxURL();
+    int influxPort = CONFIG.getInfluxPort();
+    const char *influxToken = CONFIG.getInfluxToken();
+    const char *influxBucket = CONFIG.getInfluxBucket();
+    const char *influxOrg = CONFIG.getInfluxOrg();
+    const char *influxPrefix = CONFIG.getInfluxPrefix();
 
     ESP_LOGI(TAG, "URL: %s, port: %d, bucket: %s, org: %s, prefix: %s", influxURL, influxPort, influxBucket, influxOrg,
              influxPrefix);

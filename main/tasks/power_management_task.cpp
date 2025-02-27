@@ -10,7 +10,6 @@
 
 #include "serial.h"
 #include "global_state.h"
-#include "nvs_config.h"
 #include "influx_task.h"
 #include "boards/board.h"
 
@@ -72,7 +71,7 @@ void PowerManagementTask::task()
     Board* board = SYSTEM_MODULE.getBoard();
 
 
-    uint16_t auto_fan_speed = nvs_config_get_u16(NVS_CONFIG_AUTO_FAN_SPEED, 1);
+    uint16_t auto_fan_speed = CONFIG.isAutoFanSpeed();
 
     vTaskDelay(3000 / portTICK_PERIOD_MS);
 
@@ -84,9 +83,9 @@ void PowerManagementTask::task()
         // the asics are initialized after this task starts
         Asic* asics = board->getAsics();
 
-        uint16_t core_voltage = nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE);
-        uint16_t asic_frequency = nvs_config_get_u16(NVS_CONFIG_ASIC_FREQ, CONFIG_ASIC_FREQUENCY);
-        uint16_t asic_overheat_temp = nvs_config_get_u16(NVS_CONFIG_OVERHEAT_TEMP, OVERHEAT_DEFAULT);
+        uint16_t core_voltage = CONFIG.getAsicVoltage();
+        uint16_t asic_frequency = CONFIG.getAsicFreq();
+        uint16_t asic_overheat_temp = CONFIG.getOverheatTemp();
 
         if (core_voltage != last_core_voltage) {
             ESP_LOGI(TAG, "setting new vcore voltage to %umV", core_voltage);
@@ -157,7 +156,7 @@ void PowerManagementTask::task()
         if (auto_fan_speed == 1) {
             m_fanPerc = (float) automaticFanSpeed(board, m_chipTempAvg);
         } else {
-            float fs = (float) nvs_config_get_u16(NVS_CONFIG_FAN_SPEED, 100);
+            float fs = (float) CONFIG.getFanSpeed();
             m_fanPerc = fs;
             board->setFanSpeed((float) fs / 100);
         }

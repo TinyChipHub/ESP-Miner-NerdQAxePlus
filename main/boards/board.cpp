@@ -11,10 +11,10 @@ Board::Board() {
 
 void Board::loadSettings()
 {
-    m_asicFrequency = nvs_config_get_u16(NVS_CONFIG_ASIC_FREQ, CONFIG_ASIC_FREQUENCY);
-    m_asicVoltage = nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE) / 1000.0f;
-    m_fanInvertPolarity = nvs_config_get_u16(NVS_CONFIG_INVERT_FAN_POLARITY, 1);
-    m_fanPerc = nvs_config_get_u16(NVS_CONFIG_FAN_SPEED, 100);
+    m_asicFrequency = CONFIG.getAsicFreq();
+    m_asicVoltage = (float) CONFIG.getAsicVoltage() / 1000.0f;
+    m_fanInvertPolarity = CONFIG.isInvertFanPolarity();
+    m_fanPerc = CONFIG.getFanSpeed();
 
     // was initialized with board specific default value in the constructor
     m_asicJobIntervalMs = nvs_config_get_u16(NVS_CONFIG_ASIC_JOB_INTERVAL, m_asicJobIntervalMs);

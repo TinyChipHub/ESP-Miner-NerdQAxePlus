@@ -36,6 +36,7 @@ System SYSTEM_MODULE;
 PowerManagementTask POWER_MANAGEMENT_MODULE;
 StratumManager STRATUM_MANAGER;
 APIsFetcher APIs_FETCHER;
+Config CONFIG;
 
 AsicJobs asicJobs;
 
@@ -45,9 +46,9 @@ static const char *TAG = "bitaxe";
 static void setup_wifi()
 {
     // pull the wifi credentials and hostname out of NVS
-    char *wifi_ssid = nvs_config_get_string(NVS_CONFIG_WIFI_SSID, WIFI_SSID);
-    char *wifi_pass = nvs_config_get_string(NVS_CONFIG_WIFI_PASS, WIFI_PASS);
-    char *hostname = nvs_config_get_string(NVS_CONFIG_HOSTNAME, HOSTNAME);
+    const char *wifi_ssid = CONFIG.getWifiSSID();
+    const char *wifi_pass = CONFIG.getWifiPass();
+    const char *hostname = CONFIG.getHostname();
 
     // copy the wifi ssid to the global state
     SYSTEM_MODULE.setSsid(wifi_ssid);
@@ -78,10 +79,6 @@ static void setup_wifi()
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
-
-    free(wifi_ssid);
-    free(wifi_pass);
-    free(hostname);
 }
 
 // Function to configure the Task Watchdog Timer (TWDT)
@@ -129,6 +126,9 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "Welcome to the bitaxe - hack the planet!");
     ESP_ERROR_CHECK(nvs_flash_init());
 
+    // load the config
+    CONFIG.loadConfig();
+
     // shows and saves last reset reason
     SYSTEM_MODULE.showLastResetReason();
 
@@ -167,8 +167,8 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "Found Device Model: %s", board->getDeviceModel());
     ESP_LOGI(TAG, "Found Board Version: %d", board->getVersion());
 
-    uint64_t best_diff = nvs_config_get_u64(NVS_CONFIG_BEST_DIFF, 0);
-    uint16_t should_self_test = nvs_config_get_u16(NVS_CONFIG_SELF_TEST, 0);
+    uint64_t best_diff = CONFIG.getBestDiff();
+    uint16_t should_self_test = (uint16_t) CONFIG.isSelfTest();
     if (should_self_test == 1 && best_diff < 1) {
         board->selfTest();
         vTaskDelay(60 * 60 * 1000 / portTICK_PERIOD_MS);
@@ -183,7 +183,7 @@ extern "C" void app_main(void)
     SYSTEM_MODULE.setStartupDone();
 
     // if a username is configured we assume we have a valid configuration and disable the AP
-    const char *username = nvs_config_get_string(NVS_CONFIG_STRATUM_USER, NULL);
+    const char *username = CONFIG.getStratumUser(); // TODO
     if (username) {
         wifi_softap_off();
 
