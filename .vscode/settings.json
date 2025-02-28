@@ -32,7 +32,9 @@
         "history.h": "c",
         "system.h": "c",
         "influx_task.h": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "glob": "cpp",
+        "*.mjs": "cpp"
     },
     "editor.formatOnSave": false,
     "cSpell.words": [

@@ -116,7 +116,8 @@ class StratumApi {
     int parseSubscribeResultMessage(const char *result_json_str, char **extranonce, int *extranonce2_len);
 
     // Parses a received JSON string into a StratumApiV1Message.
-    static void parse(StratumApiV1Message *message, const char *stratum_json);
+    static bool parse(StratumApiV1Message* message, const char* stratum_json);
+    static bool parse(StratumApiV1Message *message, JsonDocument &doc);
 
     // Frees a mining_notify structure allocated in parse().
     static void freeMiningNotify(mining_notify *params);

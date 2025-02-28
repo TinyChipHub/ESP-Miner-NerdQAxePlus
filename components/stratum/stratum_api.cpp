@@ -306,6 +306,21 @@ void StratumApi::freeMiningNotify(mining_notify* params)
     free(params);
 }
 
+bool StratumApi::parse(StratumApiV1Message *message, JsonDocument &doc)
+{
+    // Extract message ID
+    message->message_id = doc["id"].is<int>() ? doc["id"].as<int>() : -1;
+
+    // Extract method
+    const char *method_str = doc["method"].as<const char *>();
+
+    if (method_str) {
+        return parseMethods(doc, method_str, message);
+    } else {
+        return parseResponses(doc, message);
+    }
+}
+
 //--------------------------------------------------------------------
 // parseSubscribeResultMessage()
 //--------------------------------------------------------------------
