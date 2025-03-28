@@ -4,6 +4,7 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_task_wdt.h"
+#include "esp_psram.h"
 #include "mbedtls/platform.h"
 #include "nvs_flash.h"
 
@@ -19,7 +20,7 @@
 #include "boards/nerdhaxegamma.h"
 #include "create_jobs_task.h"
 #include "global_state.h"
-#include "history.h"
+#include "./history/history.h"
 #include "http_server.h"
 #include "influx_task.h"
 #include "main.h"

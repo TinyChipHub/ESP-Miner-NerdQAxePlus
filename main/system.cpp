@@ -23,7 +23,7 @@
 #include "i2c_master.h"
 #include "nvs_config.h"
 #include "influx_task.h"
-#include "history.h"
+#include "./history/history.h"
 #include "boards/board.h"
 
 static const char* TAG = "SystemModule";

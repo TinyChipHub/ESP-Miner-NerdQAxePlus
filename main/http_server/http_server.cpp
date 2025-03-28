@@ -33,7 +33,7 @@
 #include "recovery_page.h"
 #include "http_server.h"
 
-#include "history.h"
+#include "./history/history.h"
 #include "boards/board.h"
 
 #pragma GCC diagnostic error "-Wall"

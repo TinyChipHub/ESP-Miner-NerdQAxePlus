@@ -7,7 +7,7 @@
 #include "esp_netif.h"
 #include "freertos/queue.h"
 #include "boards/board.h"
-#include "history.h"
+#include "./history/history.h"
 
 // Configuration and constants
 #define STRATUM_USER CONFIG_STRATUM_USER

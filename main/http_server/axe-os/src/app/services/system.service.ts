@@ -67,6 +67,7 @@ const defaultInfo: ISystemInfo = {
     hashrate_1h: [],
     hashrate_1d: [],
     timestamps: [],
+    temperatures: [],
     timestampBase: 0
   }
 }

@@ -20,7 +20,12 @@ SRCS
     "boards/drivers/nerdaxe/TPS546.cpp"
     "boards/drivers/nerdaxe/adc.cpp"
     "boards/drivers/i2c_master.cpp"
-    "history.cpp"
+    "./history/history.cpp"
+    "./history/basehistory.cpp"
+    "./history/history_hashrate.cpp"
+    "./history/history_average.cpp"
+    "./history/noncedistribution.cpp"
+    "./history/temphistory.cpp"
 
     "./http_server/http_server.cpp"
     "./self_test/self_test.cpp"
