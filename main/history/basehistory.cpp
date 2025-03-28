@@ -3,7 +3,8 @@
 #include <stdint.h>
 
 #include "esp_log.h"
-#include "esp_timer.h" // Include esp_timer for esp_timer_get_time
+#include "esp_timer.h"
+#include "esp_psram.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -34,7 +35,7 @@ BaseHistory::BaseHistory()
 bool BaseHistory::init(int num_asics)
 {
     m_timestamps = (uint64_t *) heap_caps_malloc(HISTORY_MAX_SAMPLES * sizeof(uint64_t), MALLOC_CAP_SPIRAM);
-    return isAvailable();
+    return BaseHistory::isAvailable();
 }
 
 

@@ -69,7 +69,7 @@ void History::unlock()
 
 bool History::isAvailable()
 {
-    return m_shares && BaseHistory::isAvailable() && m_hashrate10m && m_hashrate1h && m_hashrate1d;
+    return BaseHistory::isAvailable() && m_shares && m_hashrate10m && m_hashrate1h && m_hashrate1d;
 }
 
 History::History() : m_avg10m(600llu * 1000llu), m_avg1h(3600llu * 1000llu), m_avg1d(86400llu * 1000llu)
