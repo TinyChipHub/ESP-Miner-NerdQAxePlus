@@ -14,6 +14,7 @@
 #include "nvs_config.h"
 #include "influx_task.h"
 #include "boards/board.h"
+#include "pid/PID_v1_bc.h"
 
 #define POLL_RATE 2000
 
@@ -46,6 +47,21 @@ void PowerManagementTask::restart() {
 void PowerManagementTask::task()
 {
     Board* board = SYSTEM_MODULE.getBoard();
+
+    float pid_input = 0.0;
+    float pid_output = 0.0;
+    float pid_setPoint = 55.0f;
+    float pid_p = 2.0f;
+    float pid_i = 0.1f;
+    float pid_d = 5.0f;
+
+    PID pid(&pid_input, &pid_output, &pid_setPoint, pid_p, pid_i, pid_d, P_ON_E, DIRECT);
+    pid.SetSampleTime(POLL_RATE - 1);
+    pid.SetOutputLimits(35, 100);
+    pid.SetMode(AUTOMATIC);
+    pid.SetControllerDirection(REVERSE);
+    pid.Initialize();
+
 
     vTaskDelay(3000 / portTICK_PERIOD_MS);
 
@@ -157,7 +173,13 @@ void PowerManagementTask::task()
         }
 
         if (auto_fan_speed) {
-            m_fanPerc = board->automaticFanSpeed(m_chipTempMax);
+            pid_input = std::max(m_chipTempMax, m_vrTemp);
+            pid.Compute();
+            m_fanPerc = (uint16_t) pid_output;
+            board->setFanSpeed(m_fanPerc / 100.0f);
+            ESP_LOGE(TAG, "Temp: %.1f°C, SetPoint: %.1f°C, Output: %.1f%%", pid_input, pid_setPoint, pid_output);
+
+//            m_fanPerc = board->automaticFanSpeed(m_chipTempMax);
         } else {
             m_fanPerc = (float) Config::getFanSpeed();
             board->setFanSpeed(m_fanPerc / 100.0f);

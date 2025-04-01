@@ -28,7 +28,7 @@ float TempHistory::getTempSample(int index)
 
 double TempHistory::getCurrentTemp()
 {
-    return 0.0f; // TODO
+    return m_tempHist.getAvg();
 }
 
 void TempHistory::lock()
@@ -74,6 +74,8 @@ void TempHistory::pushTemp(float temp, uint64_t timestamp)
     m_numSamples++;
     unlock();
 
+    update(m_tempHist);
+
 //    ESP_LOGI(TAG, "hashrate: 10m:%.3fGH%c 1h:%.3fGH%c 1d:%.3fGH%c", m_avg10m.getGh(), preliminary_10m, m_avg1h.getGh(),
 //             preliminary_1h, m_avg1d.getGh(), preliminary_1d);
 }
@@ -84,14 +86,14 @@ void TempHistory::update(HistoryAverage &hist)
     uint64_t lastTimestamp = 0;
     while (lastTimestamp = getTimestampSample(hist.m_lastSample), hist.m_lastSample + 1 < getNumSamples()) {
         hist.m_lastSample++;
-        hist.m_sum += (uint64_t) getTempSample(hist.m_lastSample);
+        hist.m_sum += getTempSample(hist.m_lastSample);
     }
 
     // adjust the window on the older side
     // we move the lower window bound until the next sample would be out of
     // the desired timespan.
     while (hist.m_firstSample + 1 < hist.m_lastSample && lastTimestamp - getTimestampSample(hist.m_firstSample + 1) >= hist.m_timespan) {
-        hist.m_sum -= (uint64_t) getTempSample(hist.m_firstSample);
+        hist.m_sum -= getTempSample(hist.m_firstSample);
         hist.m_firstSample++;
     }
 

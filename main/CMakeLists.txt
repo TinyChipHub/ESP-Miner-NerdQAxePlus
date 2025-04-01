@@ -26,6 +26,7 @@ SRCS
     "./history/history_average.cpp"
     "./history/noncedistribution.cpp"
     "./history/temphistory.cpp"
+    "./pid/PID_v1_bc.cpp"
 
     "./http_server/http_server.cpp"
     "./self_test/self_test.cpp"
