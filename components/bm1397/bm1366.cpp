@@ -123,6 +123,10 @@ void BM1366::requestChipTemp() {
     // NOP
 }
 
+void BM1366::requestChipTemp(int nr) {
+    // NOP
+}
+
 uint8_t BM1366::jobToAsicId(uint8_t job_id) {
     return (job_id * 8) & 0x7f;
 }

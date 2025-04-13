@@ -22,9 +22,12 @@
 #define CMD_READ 0x02
 #define CMD_INACTIVE 0x03
 
+#define CMD_READ_SINGLE (TYPE_CMD | GROUP_SINGLE | CMD_READ)
+#define CMD_READ_ALL    (TYPE_CMD | GROUP_ALL | CMD_READ)
+
 #define CMD_WRITE_SINGLE (TYPE_CMD | GROUP_SINGLE | CMD_WRITE)
 #define CMD_WRITE_ALL    (TYPE_CMD | GROUP_ALL | CMD_WRITE)
-#define CMD_READ_ALL    (TYPE_CMD | GROUP_ALL | CMD_READ)
+
 
 
 #define RESPONSE_CMD 0x00
@@ -100,6 +103,7 @@ public:
     bool processWork(task_result *result);
     void setJobDifficultyMask(int difficulty);
     bool setAsicFrequency(float frequency);
+    virtual void requestChipTemp(int nr) = 0;
     virtual void requestChipTemp() = 0;
     virtual uint16_t getSmallCoreCount() = 0;
     virtual uint8_t nonceToAsicNr(uint32_t nonce) = 0;

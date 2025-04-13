@@ -17,6 +17,7 @@ public:
     virtual const char* getName() { return "BM1368"; };
     virtual uint8_t init(uint64_t frequency, uint16_t asic_count, uint32_t difficulty);
     virtual int setMaxBaud(void);
+    virtual void requestChipTemp(int nr);
     virtual void requestChipTemp();
     virtual uint16_t getSmallCoreCount();
     virtual uint8_t nonceToAsicNr(uint32_t nonce);

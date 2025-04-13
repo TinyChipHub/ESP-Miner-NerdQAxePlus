@@ -138,6 +138,10 @@ void BM1370::requestChipTemp() {
     // NOP
 }
 
+void BM1370::requestChipTemp(int nr) {
+    // NOP
+}
+
 uint16_t BM1370::getSmallCoreCount() {
     return BM1370_SMALL_CORE_COUNT;
 }
