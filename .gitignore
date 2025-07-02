@@ -29,3 +29,7 @@ components/components/*
 config.bin
 config.cvs
 managed_components/*
+
+
+config-office.cvs
+config-release.cvs
