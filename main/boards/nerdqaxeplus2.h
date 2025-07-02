@@ -13,5 +13,4 @@ class NerdQaxePlus2 : public NerdQaxePlus {
   public:
     NerdQaxePlus2();
     float getTemperature(int index);
-    void setFanSpeed(float percent, uint8_t channel);
 };

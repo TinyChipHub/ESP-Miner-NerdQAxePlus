@@ -98,7 +98,6 @@ esp_err_t GET_system_info(httpd_req_t *req)
     doc["isUsingFallbackStratum"] = STRATUM_MANAGER.isUsingFallback();
     doc["isStratumConnected"] = STRATUM_MANAGER.isAnyConnected();
     doc["fanspeed"]           = POWER_MANAGEMENT_MODULE.getFanPerc();
-    doc["fanspeed2"]          = POWER_MANAGEMENT_MODULE.getFanPerc2();
     doc["fanrpm"]             = POWER_MANAGEMENT_MODULE.getFanRPM();
     doc["lastpingrtt"]        = get_last_ping_rtt();
     doc["poolDifficulty"]     = SYSTEM_MODULE.getPoolDifficulty();
@@ -290,10 +289,6 @@ esp_err_t PATCH_update_settings(httpd_req_t *req)
     }
     if (doc["fanspeed"].is<uint16_t>()) {
         Config::setFanSpeed(doc["fanspeed"].as<uint16_t>());
-    }
-    if (doc["fanspeed2"].is<uint16_t>()) {
-        //ESP_LOGI(TAG, "Setting fan speed 2 to %d", doc["fanspeed2"].as<uint16_t>());
-        Config::setFanSpeed2(doc["fanspeed2"].as<uint16_t>());
     }
     if (doc["autoscreenoff"].is<bool>()) {
         Config::setAutoScreenOff(doc["autoscreenoff"].as<bool>());

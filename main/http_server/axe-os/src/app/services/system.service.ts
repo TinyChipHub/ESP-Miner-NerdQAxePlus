@@ -63,7 +63,6 @@ const defaultInfo: ISystemInfo = {
   autofanpolarity: 1,
   autofanspeed: 1,
   fanspeed: 100,
-  fanspeed2: 100,
   fanrpm: 0,
   autoscreenoff: 0,
   lastResetReason: "Unknown",

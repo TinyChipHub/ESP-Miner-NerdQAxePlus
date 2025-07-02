@@ -1,6 +1,5 @@
 #include "board.h"
 #include "nerdqaxeplus2.h"
-#include "drivers/EMC2302.h"
 
 static const char* TAG="nerdqaxeplus2";
 
@@ -44,8 +43,4 @@ float NerdQaxePlus2::getTemperature(int index) {
     }
     // we can't read the real chip temps but this should be about right
     return temp + 10.0f; // offset of 10°C
-}
-
-void NerdQaxePlus2::setFanSpeed(float perc, uint8_t channel) {
-    EMC2302_set_fan_speed(perc, channel);
 }

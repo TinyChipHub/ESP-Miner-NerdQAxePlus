@@ -19,7 +19,6 @@ Board::Board() {
 void Board::loadSettings()
 {
     m_fanPerc = Config::getFanSpeed();
-    m_fanPerc2 = Config::getFanSpeed2();
 
     // default values are initialized in the constructor of each board
     m_asicFrequency = Config::getAsicFrequency(m_asicFrequency);

@@ -14,8 +14,6 @@
 #include "nvs_config.h"
 #include "influx_task.h"
 #include "boards/board.h"
-#include "EMC2302.h"
-#include "../boards/nerdqaxeplus2.h"
 
 #define POLL_RATE 2000
 
@@ -272,22 +270,8 @@ void PowerManagementTask::task()
                 [[fallthrough]];
             case 0:
                 // manual
-                if(strcmp(board->getDeviceModel(),"NerdQAxe++")==0){
-                    m_fanPerc = (float) Config::getFanSpeed();
-                    m_fanPerc2 = (float) Config::getFanSpeed2();
-
-                    //ESP_LOGI(TAG, "Setting fan speed 1 to %d%%", (int) m_fanPerc2);
-
-                    NerdQaxePlus2* nerdqaxeplus2 = (NerdQaxePlus2*)(board);
-                    if(nerdqaxeplus2){
-                        nerdqaxeplus2->setFanSpeed(m_fanPerc / 100.0f, EMC2302_FAN1);
-                        nerdqaxeplus2->setFanSpeed(m_fanPerc2 / 100.0f, EMC2302_FAN2);
-                    }
-                }else{
-                    m_fanPerc = (float) Config::getFanSpeed();
-                    board->setFanSpeed(m_fanPerc / 100.0f);
-                }
-
+                m_fanPerc = (float) Config::getFanSpeed();
+                board->setFanSpeed(m_fanPerc / 100.0f);
                 break;
         }
         unlock();

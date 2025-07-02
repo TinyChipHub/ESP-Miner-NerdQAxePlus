@@ -47,7 +47,6 @@ class Board {
     bool m_fanInvertPolarity;
     bool m_fanAutoPolarity;
     float m_fanPerc;
-    float m_fanPerc2;
 
     // flip screen
     bool m_flipScreen;
