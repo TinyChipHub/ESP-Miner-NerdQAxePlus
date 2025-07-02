@@ -35,6 +35,7 @@
 #define EMC2302_FAN2 0x40
 
 esp_err_t EMC2302_set_fan_speed(float);
+esp_err_t EMC2302_set_fan_speed(float,uint8_t);
 esp_err_t EMC2302_get_fan_speed(uint16_t *dst);
 bool EMC2302_init(bool);
 bool EMC2302_set_fan_polarity(bool invert);

@@ -8,6 +8,7 @@ class PowerManagementTask {
   protected:
     pthread_mutex_t m_mutex;
     uint16_t m_fanPerc;
+    uint16_t m_fanPerc2;
     uint16_t m_fanRPM;
     float m_chipTempMax;
     float m_vrTemp;
@@ -57,6 +58,11 @@ class PowerManagementTask {
     uint16_t getFanPerc()
     {
         return m_fanPerc;
+    };
+
+    uint16_t getFanPerc2()
+    {
+        return m_fanPerc2;
     };
 
     void lock() {

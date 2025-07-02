@@ -151,6 +151,7 @@ export class EditComponent implements OnInit {
           invertfanpolarity: [info.invertfanpolarity == 1, [Validators.required]],
           autofanpolarity: [info.autofanpolarity == 1, [Validators.required]],
           fanspeed: [info.fanspeed, [Validators.required]],
+          fanspeed2: [info.fanspeed2, [Validators.required]],
           overheat_temp: [info.overheat_temp, [
             Validators.min(40),
             Validators.max(90),
@@ -172,18 +173,21 @@ export class EditComponent implements OnInit {
 
     if (mode === 0) {
       enable('fanspeed');
+      enable('fanspeed2');
       disable('pidTargetTemp');
       disable('pidP');
       disable('pidI');
       disable('pidD');
     } else if (mode === 1) {
       disable('fanspeed');
+      disable('fanspeed2');
       disable('pidTargetTemp');
       disable('pidP');
       disable('pidI');
       disable('pidD');
     } else if (mode === 2) {
       disable('fanspeed');
+      disable('fanspeed2');
       enable('pidTargetTemp');
       if (this.devToolsOpen) {
         enable('pidP');

@@ -189,7 +189,7 @@
                 <!-- Manual fan speed slider -->
                 <div *ngIf="form.controls['autofanspeed'].value === 0">
                     <div class="form-row">
-                        <label>Fan Speed {{ form.controls['fanspeed'].value }}%</label>
+                        <label>Fan 1 Speed {{ form.controls['fanspeed'].value }}%</label>
                         <div class="form-control-wrapper">
                             <div class="progress-wrap">
                                 <input type="range" class="progress" formControlName="fanspeed" min="0" max="100"
@@ -200,6 +200,21 @@
                             <small *ngIf="form.controls['fanspeed'].value < 40" style="color: red; margin-left:10px;">Danger: Could Cause
                                 Overheating</small>
                             <small *ngIf="form.controls['fanspeed'].value === 100" style="color: #F2A900; margin-left:10px;">S19
+                                Simulator</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>Fan 2 Speed {{ form.controls['fanspeed2'].value }}%</label>
+                        <div class="form-control-wrapper">
+                            <div class="progress-wrap">
+                                <input type="range" class="progress" formControlName="fanspeed2" min="0" max="100"
+                                    step="1" />
+                                <div class="progress-foreground" [style.width.%]="form.controls['fanspeed2'].value">
+                                </div>
+                            </div>
+                            <small *ngIf="form.controls['fanspeed2'].value < 40" style="color: red; margin-left:10px;">Danger: Could Cause
+                                Overheating</small>
+                            <small *ngIf="form.controls['fanspeed2'].value === 100" style="color: #F2A900; margin-left:10px;">S19
                                 Simulator</small>
                         </div>
                     </div>
