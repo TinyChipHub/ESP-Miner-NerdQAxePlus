@@ -30,10 +30,5 @@ config.bin
 config.cvs
 managed_components/*
 
-<<<<<<< HEAD
 config-office.cvs
 config-release.cvs
-=======
-
-config-office.cvs
->>>>>>> ed443a522c252b1b0c3d3309cca8a74dfa228530
