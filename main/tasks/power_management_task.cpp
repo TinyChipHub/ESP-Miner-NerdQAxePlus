@@ -255,21 +255,6 @@ void PowerManagementTask::task()
         m_pid->Compute();
 
         switch (temp_control_mode) {
-            case 1:
-                // classic automatic fan control
-                m_fanPerc = board->automaticFanSpeed(m_chipTempMax);
-                board->setFanSpeed(m_fanPerc / 100.0f);
-                break;
-            case 2:
-                // pid
-                m_fanPerc = roundf(pid_output);
-                board->setFanSpeed(m_fanPerc / 100.0f);
-                //ESP_LOGI(TAG, "PID: Temp: %.1f°C, SetPoint: %.1f°C, Output: %.1f%%", pid_input, pid_target, pid_output);
-                //ESP_LOGI(TAG, "p:%.2f i:%.2f d:%.2f", m_pid->GetKp(), m_pid->GetKi(), m_pid->GetKd());
-                break;
-            default:
-                ESP_LOGE(TAG, "invalid temp control mode: %d. Defaulting to manual.", temp_control_mode);
-                [[fallthrough]];
             case 0:
                 // manual
                 if(strcmp(board->getDeviceModel(),"NerdQAxe++")==0){
@@ -289,6 +274,30 @@ void PowerManagementTask::task()
                 }
 
                 break;
+            case 2:
+                // pid
+                m_fanPerc =  (uint16_t)roundf(pid_output);
+                board->setFanSpeed((float)m_fanPerc / 100.0f);
+                //ESP_LOGI(TAG, "PID: Temp: %.1f°C, SetPoint: %.1f°C, Output: %.1f%%", pid_input, pid_target, pid_output);
+                //ESP_LOGI(TAG, "p:%.2f i:%.2f d:%.2f", m_pid->GetKp(), m_pid->GetKi(), m_pid->GetKd());
+                break;
+            default:
+                ESP_LOGE(TAG, "invalid temp control mode: %d. Defaulting to manual mode 100%%.", temp_control_mode);
+                if(strcmp(board->getDeviceModel(),"NerdQAxe++")==0){
+                    m_fanPerc = 100;
+                    m_fanPerc2 = 100;
+
+                    //ESP_LOGI(TAG, "Setting fan speed 1 to %d%%", (int) m_fanPerc2);
+
+                    NerdQaxePlus2* nerdqaxeplus2 = (NerdQaxePlus2*)(board);
+                    if(nerdqaxeplus2){
+                        nerdqaxeplus2->setFanSpeed(m_fanPerc / 100.0f, EMC2302_FAN1);
+                        nerdqaxeplus2->setFanSpeed(m_fanPerc2 / 100.0f, EMC2302_FAN2);
+                    }
+                }else{
+                    m_fanPerc = 100;
+                    board->setFanSpeed(m_fanPerc / 100.0f);
+                }
         }
         unlock();
 

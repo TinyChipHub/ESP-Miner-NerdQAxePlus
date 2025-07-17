@@ -81,6 +81,11 @@ float History::getHashrate1dSample(int index)
     return m_hashrate1d[WRAP(index)];
 }
 
+double History::getCurrentHashrate1m()
+{
+    return m_avg1m.getGh();
+}
+
 double History::getCurrentHashrate10m()
 {
     return m_avg10m.getGh();
@@ -122,7 +127,7 @@ bool History::isAvailable()
     return m_shares && m_timestamps && m_hashrate10m && m_hashrate1h && m_hashrate1d;
 }
 
-History::History() : m_avg10m(this, 600llu * 1000llu), m_avg1h(this, 3600llu * 1000llu), m_avg1d(this, 86400llu * 1000llu)
+History::History() : m_avg1m(this, 60llu * 1000llu), m_avg10m(this, 600llu * 1000llu), m_avg1h(this, 3600llu * 1000llu), m_avg1d(this, 86400llu * 1000llu)
 {
     // NOP
 }

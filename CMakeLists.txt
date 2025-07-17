@@ -37,6 +37,7 @@ include_directories("./components/arduinojson")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
+set(PROJECT_VER "v1.0.33-TCH-Release")
 
 project(esp-miner)
 

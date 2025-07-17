@@ -338,7 +338,7 @@ export class EditComponent implements OnInit {
         values = [400, 425, 450, 475, 490, 500, 525, 550, 575];
         break;
       case eASICModel.BM1370:
-        values = [500, 515, 525, 550, 575, 590, 600];
+        values = [500, 515, 525, 550, 575, 590, 600, 625, 650];
         break;
       default:
         return [];
